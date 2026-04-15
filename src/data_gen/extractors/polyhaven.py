@@ -18,8 +18,9 @@ RESOLUTION = {
     "models": "2k",
 }
 
-# File keys to pull per texture asset
-TEXTURE_KEYS = ["diffuse", "rough", "nor_gl", "disp"]
+# File keys to pull per texture asset — must match the API's exact key names.
+# Verified from api.polyhaven.com/files/<id>: keys are mixed-case.
+TEXTURE_KEYS = ["Diffuse", "Rough", "nor_gl", "Displacement"]
 
 
 class PolyHavenExtractor(AssetExtractor):
@@ -37,10 +38,14 @@ class PolyHavenExtractor(AssetExtractor):
     def download(self, asset_id: str) -> Path | None:
         asset_dir = self.output_dir / asset_id
 
-        # For models: only skip if a GLTF already exists (not just any file).
-        # Old downloads may contain only a compressed .blend that can't be loaded.
+        # For models: only skip if a GLTF already exists.
+        # For textures: only skip if the colour (diffuse) map was downloaded.
+        # Old runs may have only the nor_gl map due to wrong API key names.
         if self.asset_type == "models":
             if (asset_dir / f"{asset_id}.gltf").exists():
+                return asset_dir
+        elif self.asset_type == "textures":
+            if (asset_dir / "diffuse.jpg").exists():
                 return asset_dir
         elif asset_dir.exists():
             return asset_dir  # already downloaded
@@ -61,7 +66,9 @@ class PolyHavenExtractor(AssetExtractor):
             for key in TEXTURE_KEYS:
                 url = files.get(key, {}).get(self.resolution, {}).get("jpg", {}).get("url")
                 if url:
-                    self._fetch_file(url, asset_dir / f"{key}.jpg")
+                    # Normalise to lowercase so glob patterns in make_pbr_material
+                    # work case-consistently on Linux (e.g. "Diffuse" → "diffuse.jpg")
+                    self._fetch_file(url, asset_dir / f"{key.lower()}.jpg")
 
         elif self.asset_type == "models":
             # Prefer GLTF: portable, uncompressed, PBR textures included.
