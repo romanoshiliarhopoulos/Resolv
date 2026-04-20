@@ -38,7 +38,7 @@ PROJECT_ROOT = Path(__file__).parents[2]
 DATA_DIR     = PROJECT_ROOT / "data"
 RENDERS_DIR  = DATA_DIR / "renders"
 
-DEFAULT_NOISE_LEVELS = [4, 16, 64]
+DEFAULT_NOISE_LEVELS = [2, 4, 16, 64]
 SAMPLES_CLEAN        = 1024
 
 
