@@ -44,7 +44,7 @@ COMPLEXITY_PRESETS = {
     "complex": dict(num_objects=6, width=1920, height=1080),
 }
 
-DEFAULT_NOISE_LEVELS = [4, 16, 64]
+DEFAULT_NOISE_LEVELS = [1, 2, 4, 16]
 DEFAULT_SAMPLES_CLEAN = 1024
 
 
